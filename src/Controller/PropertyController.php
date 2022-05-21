@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Property;
+use App\Repository\PropertyRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class PropertyController extends AbstractController
 {
@@ -15,23 +18,25 @@ class PropertyController extends AbstractController
         0 => 'electric',
         1 => 'gaz'
     ];
+    private $propertyRepository;
 
-    private $doctrine;
-
-    public function __construct(ManagerRegistry $doctrine)
+    public function __construct(PropertyRepository $propertyRepository)
     {
-        $this->doctrine = $doctrine;
+        $this->propertyRepository = $propertyRepository;
     }
 
     #[Route('/biens', name: 'property_index')]
-    public function index(): Response
+    public function index(Request $request,PaginatorInterface $paginator): Response
     {
-
-        // $repoProperty = $this->doctrine->getRepository(Property::class);
-
+        $properties = $paginator->paginate(
+            $this->propertyRepository->findAllVisibleQuery(),
+            $request->query->getInt('page', 1),
+            12
+        );
 
         return $this->render('property/index.html.twig', [
-            'current_menu' => 'property'
+            'current_menu'  => 'property',
+            'properties'    => $properties
         ]);
     }
 
