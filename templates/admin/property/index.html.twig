@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title 'Gérer les biens' %}
-{% block body %}
+{% block body %}	
 	<div class="container mt-4">
 		<h1>Gérer les biens</h1>
 		{% for message in app.flashes('success') %}
@@ -22,10 +22,9 @@
 						<td>{{property.title}}</td>
 						<td>
 							<a href="{{ path('admin_property_edit', {id: property.id} ) }}" class="btn btn-secondary">Editer</a>
-							<form method="POST" action="{{ path('admin_property_delete', {id: property.id}) }}" style="display:inline-block;"
-							onsubmit="return confirm('Etes vous vraiment sûr ?')">
+							<form method="POST" action="{{ path('admin_property_delete', {id: property.id}) }}" style="display:inline-block;" onsubmit="return confirm('Etes vous vraiment sûr ?')">
 								<input type="hidden" name="_method" value="DELETE">
-								<input type="hidden" name="_token" value="{{ csrf_token('delete'~ property.id)  }}">
+								<input type="hidden" name="_token" value="{{ csrf_token('delete'~ property.id) }}">
 								<button class="btn btn-danger">Supprimer</button>
 							</form>
 
