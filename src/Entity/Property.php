@@ -10,7 +10,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Cocur\Slugify\Slugify;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
+/**
+ * @Vich\Uploadable
+ */
 #[ORM\Entity(repositoryClass: PropertyRepository::class)]
 #[UniqueEntity('title')]
 class Property
@@ -24,6 +29,17 @@ class Property
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $fileName;
+
+    /**
+     * @Vich\UploadableField(mapping="property_image", fileNameProperty="fileName")
+     * 
+     * @var File|null
+     */
+    #[Assert\Image(mimeTypes:['image/jpeg'])]
+    private $imageFile;
     
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\Length(
@@ -31,7 +47,6 @@ class Property
         max:255,
         minMessage: 'Your first name must be at least {{ limit }} characters long'
         )]
-    
     private $title;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -74,6 +89,9 @@ class Property
 
     #[ORM\ManyToMany(targetEntity: Option::class, inversedBy: 'properties')]
     private $options;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private $updated_at;
 
 
     public function __construct()
@@ -280,6 +298,64 @@ class Property
     public function removeOption(Option $option): self
     {
         $this->options->removeElement($option);
+
+        return $this;
+    }
+
+    /**
+     * Get the value of fileName
+     */ 
+    public function getFileName()
+    {
+        return $this->fileName;
+    }
+
+    /**
+     * Set the value of fileName
+     *
+     * @return  self
+     */ 
+    public function setFileName($fileName)
+    {
+        $this->fileName = $fileName;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of imageFile
+     *
+     * @return  File|null
+     */ 
+    public function getImageFile()
+    {
+        return $this->imageFile;
+    }
+
+    /**
+     * Set the value of imageFile
+     *
+     * @param  File|null  $imageFile
+     *
+     * @return  self
+     */ 
+    public function setImageFile($imageFile)
+    {
+        $this->imageFile = $imageFile;
+        if ($this->imageFile instanceof UploadedFile) {
+            $this->updated_at = new \DateTimeImmutable();
+        }
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updated_at): self
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }
